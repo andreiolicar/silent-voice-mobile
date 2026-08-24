@@ -32,6 +32,7 @@ export function MainAppScreen({
 
   const handleNavigation = (item: BottomNavigationItem) => {
     if (item === 'home') router.replace('/home');
+    if (item === 'communication') router.replace('/live');
   };
 
   return (

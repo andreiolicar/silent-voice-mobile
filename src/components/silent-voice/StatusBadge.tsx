@@ -42,6 +42,7 @@ export function StatusBadge({
       <Icon
         color={colors.white}
         size={size === 'compact' ? 8 : 10}
+        style={styles.iconGlyph}
         strokeWidth={3}
       />
     </View>
@@ -88,10 +89,12 @@ const styles = StyleSheet.create({
   icon: {
     width: 16,
     height: 16,
+    flexShrink: 0,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radii.full,
   },
+  iconGlyph: { alignSelf: 'center' },
   compact: {
     minHeight: 22,
     gap: spacing.sm,
@@ -99,6 +102,6 @@ const styles = StyleSheet.create({
     paddingVertical: spacing.xxs,
     borderWidth: 0.4,
   },
-  compactIcon: { width: 13, height: 13 },
+  compactIcon: { width: 14, height: 14 },
   compactText: { fontSize: 9, lineHeight: 10 },
 });

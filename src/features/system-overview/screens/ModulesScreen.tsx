@@ -56,7 +56,7 @@ export default function ModulesScreen() {
             state={module.state}
           />
         ))}
-        <LiveCommunicationButton />
+        <LiveCommunicationButton onPress={() => router.push('/live')} />
       </View>
     </MainAppScreen>
   );

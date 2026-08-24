@@ -23,7 +23,7 @@ import {
 
 import { AppText } from './AppText';
 
-type ButtonVariant = 'primary' | 'ghost';
+type ButtonVariant = 'primary' | 'ghost' | 'danger';
 
 type ButtonProps = Omit<PressableProps, 'children' | 'style'> & {
   label: string;
@@ -66,7 +66,12 @@ export function Button({
   const reduceMotion = useReducedMotion();
   const isDisabled = disabled || loading;
   const foreground =
-    foregroundColor ?? (variant === 'primary' ? colors.white : colors.primary);
+    foregroundColor ??
+    (variant === 'primary'
+      ? colors.white
+      : variant === 'danger'
+        ? colors.error
+        : colors.primary);
 
   return (
     <Pressable
@@ -129,7 +134,13 @@ export function Button({
           ) : null}
           <AppText
             style={labelStyle}
-            tone={variant === 'primary' ? 'inverse' : 'primary'}
+            tone={
+              variant === 'primary'
+                ? 'inverse'
+                : variant === 'danger'
+                  ? 'error'
+                  : 'primary'
+            }
             variant="button"
           >
             {label}
@@ -153,11 +164,16 @@ const styles = StyleSheet.create({
   },
   primary: { backgroundColor: colors.accent },
   ghost: { backgroundColor: 'transparent' },
+  danger: {
+    backgroundColor: colors.errorSoft,
+    borderColor: 'rgba(196, 61, 77, 0.32)',
+  },
   primaryHovered: { opacity: 0.9 },
   ghostHovered: {
     backgroundColor: colors.accentSoft,
     borderColor: colors.accent,
   },
+  dangerHovered: { opacity: 0.84 },
   content: {
     flexDirection: 'row',
     alignItems: 'center',

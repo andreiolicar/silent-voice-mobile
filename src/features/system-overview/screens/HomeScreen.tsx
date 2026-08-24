@@ -147,7 +147,7 @@ export default function HomeScreen() {
           </View>
         </Card>
 
-        <LiveCommunicationButton />
+        <LiveCommunicationButton onPress={() => router.push('/live')} />
       </View>
     </MainAppScreen>
   );
