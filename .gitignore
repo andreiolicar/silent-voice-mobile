@@ -13,9 +13,12 @@ expo-env.d.ts
 .kotlin/
 *.orig.*
 *.jks
+*.keystore
 *.p8
 *.p12
 *.key
+*.cer
+*.der
 *.mobileprovision
 
 # Metro
@@ -25,18 +28,34 @@ expo-env.d.ts
 npm-debug.*
 yarn-debug.*
 yarn-error.*
+*.log
 
 # macOS
 .DS_Store
 *.pem
 
 # local env files
-.env*.local
+.env
+.env.*
+!.env.example
 
 # typescript
 *.tsbuildinfo
 
-example
+# test and tool caches
+coverage/
+.cache/
+.eslintcache
+.metro-cache/
+.prettier-cache
+
+# local editor and agent state
+.idea/
+.claude/
+*.code-workspace
+*.swp
+*.tmp
+*.temp
 
 # generated native folders
 /ios
