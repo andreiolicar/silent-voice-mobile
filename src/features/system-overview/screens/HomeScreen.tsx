@@ -121,12 +121,14 @@ export default function HomeScreen() {
 
         <Card style={styles.communicationCard}>
           <View style={styles.communicationVisual}>
-            <RadarIndicator
-              accessibilityLabel="Comunicação disponível"
-              center="none"
-              rings={4}
-              size={70}
-            />
+            <View style={styles.communicationRings}>
+              <RadarIndicator
+                accessibilityLabel="Comunicação disponível"
+                center="none"
+                rings={4}
+                size={70}
+              />
+            </View>
             <View style={styles.wearableFrame}>
               <Image source={wearableAndPhone} style={styles.wearableImage} />
             </View>
@@ -235,6 +237,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
   },
+  communicationRings: { opacity: 0.7 },
   wearableFrame: {
     position: 'absolute',
     top: 10,
