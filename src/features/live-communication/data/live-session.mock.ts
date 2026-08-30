@@ -9,7 +9,8 @@ import type {
 
 export const liveSessionPhases: LiveSessionPhase[] = [
   'idle',
-  'listening',
+  'ready',
+  'capturing',
   'decoding',
   'candidate',
   'validating',
@@ -45,8 +46,8 @@ const confirmedEntries: ConfirmedUtterance[] = [
 ];
 
 const layerLabels: Pick<ValidationLayer, 'id' | 'label'>[] = [
+  { id: 'physicalAuthorization', label: 'Autorização física' },
   { id: 'neuromuscular', label: 'Neuromuscular' },
-  { id: 'mechanical', label: 'Mecânica' },
   { id: 'visual', label: 'Visual' },
   { id: 'contextual', label: 'Contextual' },
   { id: 'decision', label: 'Decisão' },
@@ -58,7 +59,9 @@ function validationLayersFor(phase: LiveSessionPhase): ValidationLayer[] {
       ? ['approved', 'approved', 'approved', 'validating', 'waiting']
       : phase === 'confirmed' || phase === 'speaking'
         ? ['approved', 'approved', 'approved', 'approved', 'approved']
-        : ['waiting', 'waiting', 'waiting', 'waiting', 'waiting'];
+        : phase === 'capturing'
+          ? ['approved', 'waiting', 'waiting', 'waiting', 'waiting']
+          : ['waiting', 'waiting', 'waiting', 'waiting', 'waiting'];
 
   return layerLabels.map((layer, index) => ({
     ...layer,

@@ -1,15 +1,14 @@
-export type SystemMetricId = 'battery' | 'connection' | 'latency' | 'modules';
+export type SystemMetricId = 'power' | 'connection' | 'latency' | 'modules';
 
 export type SystemModuleId =
-  'confirmation' | 'imu' | 'inmp441' | 'myoware' | 'openmv';
+  'raspberryPi' | 'esp32' | 'myoware' | 'camera' | 'inmp441' | 'audioOutput';
 
 export type SystemModule = Readonly<{
-  battery: number;
-  icon: 'activity' | 'box' | 'camera' | 'eye' | 'mic';
+  detail: string;
+  icon: 'activity' | 'camera' | 'gateway' | 'mic' | 'processor' | 'speaker';
   id: SystemModuleId;
   name: string;
-  requirement: 'optional' | 'required';
-  rssi: number | null;
+  requirement: 'required';
   state: 'connected' | 'disconnected';
 }>;
 
@@ -37,17 +36,20 @@ export type HomeOverview = Readonly<{
   }>;
 }>;
 
-export type HealthMetricId =
-  'battery' | 'latency' | 'processor' | 'temperature';
+export type HealthMetricId = 'power' | 'latency' | 'processor' | 'temperature';
+
+export type HealthMetricValue =
+  | Readonly<{ state: 'available'; text: string }>
+  | Readonly<{ state: 'unknown' | 'unavailable' }>;
 
 export type HealthMetric = Readonly<{
   description?: string;
-  icon: 'activity' | 'battery' | 'cpu' | 'thermometer';
+  icon: 'activity' | 'cpu' | 'power' | 'thermometer';
   id: HealthMetricId;
   label: string;
   progress?: number;
   status?: string;
-  value: string;
+  value: HealthMetricValue;
 }>;
 
 export type SystemHealth = Readonly<{
@@ -62,49 +64,52 @@ export type SystemHealth = Readonly<{
 
 export const systemModulesMock = [
   {
-    id: 'openmv',
-    name: 'OpenMV Cam H7',
-    icon: 'camera',
+    id: 'raspberryPi',
+    name: 'Raspberry Pi Zero 2 W',
+    icon: 'gateway',
+    detail: 'Gateway principal • USB',
     requirement: 'required',
     state: 'connected',
-    rssi: -42,
-    battery: 96,
+  },
+  {
+    id: 'esp32',
+    name: 'ESP32-S3',
+    icon: 'processor',
+    detail: 'Aquisição EMG • UART',
+    requirement: 'required',
+    state: 'connected',
   },
   {
     id: 'myoware',
-    name: 'Myoware 2.0',
+    name: 'MyoWare 2',
     icon: 'activity',
+    detail: 'Sinal neuromuscular',
     requirement: 'required',
     state: 'connected',
-    rssi: -50,
-    battery: 100,
+  },
+  {
+    id: 'camera',
+    name: 'Câmera OV5647',
+    icon: 'camera',
+    detail: 'Visão • CSI',
+    requirement: 'required',
+    state: 'connected',
   },
   {
     id: 'inmp441',
     name: 'INMP441',
     icon: 'mic',
+    detail: 'Contexto sonoro • I²S',
     requirement: 'required',
     state: 'connected',
-    rssi: -58,
-    battery: 82,
   },
   {
-    id: 'imu',
-    name: 'IMU',
-    icon: 'box',
+    id: 'audioOutput',
+    name: 'Saída de áudio',
+    icon: 'speaker',
+    detail: 'MAX98357A + alto-falante',
     requirement: 'required',
     state: 'connected',
-    rssi: -65,
-    battery: 22,
-  },
-  {
-    id: 'confirmation',
-    name: 'Confirmation',
-    icon: 'eye',
-    requirement: 'optional',
-    state: 'disconnected',
-    rssi: null,
-    battery: 0,
   },
 ] as const satisfies readonly SystemModule[];
 
@@ -126,10 +131,10 @@ export const homeOverviewMock: HomeOverview = {
   },
   metrics: [
     {
-      id: 'battery',
-      label: 'Bateria',
-      value: '86%',
-      description: 'Carregado',
+      id: 'power',
+      label: 'Alimentação',
+      value: 'Estável',
+      description: 'Módulo principal',
     },
     {
       id: 'latency',
@@ -140,7 +145,7 @@ export const homeOverviewMock: HomeOverview = {
     {
       id: 'connection',
       label: 'Conexão',
-      value: 'BLE +Wi-Fi',
+      value: 'USB',
       description: 'Conectado',
     },
     {
@@ -160,35 +165,34 @@ export const homeOverviewMock: HomeOverview = {
 export const systemHealthMock: SystemHealth = {
   metrics: [
     {
-      id: 'battery',
-      icon: 'battery',
-      label: 'Bateria Li-Po',
-      value: '86%',
-      progress: 0.8,
-      description: 'Carregamento normal.',
+      id: 'power',
+      icon: 'power',
+      label: 'Alimentação',
+      value: { state: 'available', text: 'Estável' },
+      description: 'Fontes dedicadas operando.',
     },
     {
       id: 'temperature',
       icon: 'thermometer',
       label: 'Temperatura',
-      value: '26°C',
-      progress: 0.48,
-      description: 'Dentro da faixa ideal.',
+      value: { state: 'available', text: '47°C' },
+      progress: 0.47,
+      description: 'Raspberry Pi em faixa normal.',
     },
     {
       id: 'latency',
       icon: 'activity',
       label: 'Latência',
-      value: '142ms',
+      value: { state: 'available', text: '142ms' },
       status: 'Abaixo de 200ms',
     },
     {
       id: 'processor',
       icon: 'cpu',
-      label: 'Uso ESP32-S3',
-      value: '48%',
-      progress: 0.64,
-      description: 'Carregamento normal.',
+      label: 'Uso Raspberry Pi',
+      value: { state: 'available', text: '48%' },
+      progress: 0.48,
+      description: 'Carga estimada do gateway.',
     },
   ],
   stability: {
@@ -196,5 +200,5 @@ export const systemHealthMock: SystemHealth = {
     description: 'Desempenho na última hora.',
     status: 'Estável',
   },
-  privacy: 'Seus dados são protegidos e não são compartilhados.',
+  privacy: 'Telemetria demonstrativa até a integração com o hardware.',
 };

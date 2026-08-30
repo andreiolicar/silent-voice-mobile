@@ -1,58 +1,87 @@
-import { Bluetooth, Headphones, Link, RefreshCcw } from 'lucide-react-native';
-import { useRouter } from 'expo-router';
-import { useEffect, useRef, useState } from 'react';
-import { Image, Platform, StyleSheet, View } from 'react-native';
+import { Cable, Link, RefreshCcw, Usb } from 'lucide-react-native';
+import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useEffect, useMemo, useState } from 'react';
+import { Platform, StyleSheet, View } from 'react-native';
 
-import { DeviceCard, PrivacyNotice } from '@/components/silent-voice';
-import { AppText, Button, Card, IconButton } from '@/components/ui';
+import {
+  DeviceCard,
+  PrivacyNotice,
+  StatusBadge,
+} from '@/components/silent-voice';
+import { AppText, Button, Card } from '@/components/ui';
+import type { DeviceConnectionState } from '@/domain/device';
 import {
   BrandLogo,
   InitialFlowScreen,
 } from '@/features/initial-flow/components';
-import { colors, fontFamilies } from '@/theme';
+import { colors, fontFamilies, radii } from '@/theme';
 
-type ConnectionState = 'scanning' | 'selected' | 'connecting' | 'connected';
+import {
+  connectionStateCopy,
+  mockUsbConnectionSequence,
+  resolveMockConnectionState,
+} from '../data/connection.mock';
 
-const neckband = require('@/assets/images/initial-flow/connection-neckband.png');
-const neckbandThumbnail = require('@/assets/images/initial-flow/connection-neckband-thumbnail.png');
-const radar = require('@/assets/images/initial-flow/connection-radar.png');
 const POST_CONNECTION_ROUTE = '/home' as const;
+const MOCK_STEP_DURATION = 850;
 
 export default function Connection() {
   const router = useRouter();
-  const [state, setState] = useState<ConnectionState>('scanning');
-  const scanTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const feedbackTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
-
-  const startScan = () => {
-    if (scanTimer.current) clearTimeout(scanTimer.current);
-    if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
-    setState('scanning');
-    scanTimer.current = setTimeout(() => setState('selected'), 900);
-  };
+  const params = useLocalSearchParams<{ state?: string | string[] }>();
+  const inspectedState = resolveMockConnectionState(params.state);
+  const [flowVersion, setFlowVersion] = useState(0);
+  const [mockState, setMockState] =
+    useState<DeviceConnectionState>('waitingForUsb');
+  const state = inspectedState ?? mockState;
 
   useEffect(() => {
-    scanTimer.current = setTimeout(() => setState('selected'), 900);
-    return () => {
-      if (scanTimer.current) clearTimeout(scanTimer.current);
-      if (feedbackTimer.current) clearTimeout(feedbackTimer.current);
-    };
-  }, []);
+    if (inspectedState) return;
 
-  const connect = () => {
-    if (state !== 'selected') return;
-    setState('connecting');
-    feedbackTimer.current = setTimeout(() => {
-      setState('connected');
-      feedbackTimer.current = setTimeout(
-        () => router.replace(POST_CONNECTION_ROUTE),
-        600,
+    const timers = mockUsbConnectionSequence
+      .slice(1)
+      .map((nextState, index) =>
+        setTimeout(
+          () => setMockState(nextState),
+          MOCK_STEP_DURATION * (index + 1),
+        ),
       );
-    }, 850);
-  };
+    const navigationTimer = setTimeout(
+      () => router.replace(POST_CONNECTION_ROUTE),
+      MOCK_STEP_DURATION * mockUsbConnectionSequence.length,
+    );
 
-  const devicesVisible = state !== 'scanning';
-  const selected = devicesVisible && state !== 'connected';
+    return () => {
+      timers.forEach(clearTimeout);
+      clearTimeout(navigationTimer);
+    };
+  }, [flowVersion, inspectedState, router]);
+
+  const copy = connectionStateCopy[state];
+  const isConnected = state === 'connected';
+  const isFailed = state === 'failed';
+  const action = useMemo(() => {
+    if (isConnected) {
+      return {
+        icon: Link,
+        label: 'Continuar',
+        onPress: () => router.replace(POST_CONNECTION_ROUTE),
+      };
+    }
+    if (isFailed) {
+      return {
+        icon: RefreshCcw,
+        label: 'Tentar novamente',
+        onPress: () => {
+          if (inspectedState) router.replace('/connection');
+          else {
+            setMockState('waitingForUsb');
+            setFlowVersion((current) => current + 1);
+          }
+        },
+      };
+    }
+    return null;
+  }, [inspectedState, isConnected, isFailed, router]);
 
   return (
     <InitialFlowScreen background={null} contentStyle={styles.content}>
@@ -64,105 +93,66 @@ export default function Connection() {
             Conectar{`\n`}dispositivo
           </AppText>
           <AppText style={styles.subtitle} tone="secondary">
-            Buscando módulos próximos{`\n`}para iniciar o pareamento.
+            Conecte o Silent Voice ao celular{`\n`}usando o cabo de dados USB.
           </AppText>
         </View>
-        <Image resizeMode="contain" source={neckband} style={styles.neckband} />
+        <View style={styles.headerIcon}>
+          <Cable color={colors.accent} size={46} strokeWidth={1.4} />
+        </View>
       </View>
 
-      <Card style={styles.searchCard}>
-        <View style={styles.radarFrame}>
-          <Image source={radar} style={styles.radar} />
-        </View>
-        <View style={styles.searchCopy}>
-          <AppText style={styles.searchTitle}>Buscando dispositivos...</AppText>
-          <AppText style={styles.searchDescription} tone="secondary">
-            Mantenha o dispositivo ligado{`\n`}e por perto.
-          </AppText>
-        </View>
-      </Card>
-
-      <View style={styles.devicesSection}>
-        <View style={styles.devicesHeadline}>
-          <AppText style={styles.sectionLabel} tone="secondary">
-            DISPOSITIVOS ENCONTRADOS
-          </AppText>
-          <IconButton
-            accessibilityLabel="Atualizar dispositivos encontrados"
-            icon={RefreshCcw}
-            iconSize={12}
-            onPress={startScan}
-            size="compact"
-            variant="refresh"
+      <Card style={styles.statusCard}>
+        <View style={styles.statusIcon}>
+          <Usb
+            color={copy.tone === 'error' ? colors.error : colors.accent}
+            size={24}
           />
         </View>
-
-        <View style={styles.devices}>
-          {devicesVisible ? (
-            <>
-              <DeviceCard
-                battery={67}
-                imageSource={neckbandThumbnail}
-                name="Silent Voice Neckband"
-                onPress={() => setState('selected')}
-                rssi={-72}
-                status="Pronto para conectar"
-                variant="silentVoice"
-              />
-              <DeviceCard
-                battery={67}
-                icon={Headphones}
-                name="AirPods Pro"
-                rssi={-72}
-                variant="external"
-              />
-              <DeviceCard
-                battery={32}
-                icon={Bluetooth}
-                name="Dispositivo desconhecido"
-                rssi={-85}
-                variant="external"
-              />
-            </>
-          ) : (
-            <View style={styles.scanningPlaceholder}>
-              <AppText style={styles.scanningText} tone="secondary">
-                Procurando dispositivos próximos...
-              </AppText>
-            </View>
-          )}
+        <View style={styles.statusCopy}>
+          <AppText style={styles.statusTitle}>{copy.title}</AppText>
+          <AppText style={styles.statusDescription} tone="secondary">
+            {copy.description}
+          </AppText>
         </View>
+        <StatusBadge label="USB" size="compact" tone={copy.tone} />
+      </Card>
+
+      <View style={styles.deviceSection}>
+        <AppText style={styles.sectionLabel} tone="secondary">
+          MÓDULO SILENT VOICE
+        </AppText>
+        <DeviceCard
+          description="Raspberry Pi Zero 2 W"
+          icon={Usb}
+          name="Módulo Silent Voice"
+          status={copy.moduleStatus}
+          statusTone={copy.tone}
+        />
       </View>
 
       <View style={styles.spacer} />
       <View style={styles.footer}>
-        <View style={styles.buttons}>
+        {action ? (
           <Button
             contentStyle={styles.buttonContent}
-            disabled={!selected}
-            iconSize={14}
-            label={state === 'connected' ? 'Conectado' : 'Conectar'}
-            labelStyle={styles.buttonLabel}
-            leftIcon={Link}
+            label={action.label}
+            leftIcon={action.icon}
+            onPress={action.onPress}
+            style={styles.button}
+          />
+        ) : (
+          <Button
+            contentStyle={styles.buttonContent}
+            disabled
+            label={copy.title}
+            leftIcon={Usb}
             loading={state === 'connecting'}
-            onPress={connect}
             style={styles.button}
           />
-          <Button
-            contentStyle={styles.buttonContent}
-            foregroundColor={colors.accent}
-            iconSize={14}
-            label="Tentar novamente"
-            labelStyle={styles.retryLabel}
-            leftIcon={RefreshCcw}
-            onPress={startScan}
-            style={styles.button}
-            variant="ghost"
-          />
-        </View>
+        )}
         <PrivacyNotice
           compact
-          text="Seus dados são protegidos e não são compartilhados."
+          text="A conexão USB será autorizada quando o módulo estiver conectado."
         />
       </View>
     </InitialFlowScreen>
@@ -176,78 +166,63 @@ const styles = StyleSheet.create({
   },
   logo: { alignSelf: 'center', marginBottom: 35 },
   header: {
-    position: 'relative',
-    height: 112,
-    justifyContent: 'center',
+    minHeight: 112,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   headingCopy: { gap: 10 },
-  title: {
-    fontSize: 26,
-    lineHeight: 28,
-    letterSpacing: -0.4,
-  },
+  title: { fontSize: 26, lineHeight: 28, letterSpacing: -0.4 },
   subtitle: {
     fontFamily: fontFamilies.regular,
     fontSize: 12,
     lineHeight: 16,
   },
-  neckband: {
-    position: 'absolute',
-    top: -26,
-    right: -33,
-    width: 194,
-    height: 184,
+  headerIcon: {
+    width: 96,
+    height: 96,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radii.full,
+    backgroundColor: colors.accentSoft,
   },
-  searchCard: {
-    height: 80,
+  statusCard: {
+    minHeight: 80,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 12,
     marginTop: 35,
     padding: 12,
   },
-  radarFrame: { width: 55, height: 55 },
-  radar: { position: 'absolute', left: -5, width: 60, height: 55 },
-  searchCopy: { gap: 5 },
-  searchTitle: {
+  statusIcon: {
+    width: 44,
+    height: 44,
+    flexShrink: 0,
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderRadius: radii.full,
+    backgroundColor: colors.background,
+  },
+  statusCopy: { minWidth: 0, flex: 1, gap: 5 },
+  statusTitle: {
     fontFamily: fontFamilies.semiBold,
     fontSize: 12,
     lineHeight: 15,
   },
-  searchDescription: {
+  statusDescription: {
     fontFamily: fontFamilies.medium,
     fontSize: 9,
-    lineHeight: 10,
+    lineHeight: 12,
   },
-  devicesSection: { marginTop: 26 },
-  devicesHeadline: {
-    height: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
-  },
+  deviceSection: { gap: 12, marginTop: 26 },
   sectionLabel: {
     fontFamily: fontFamilies.medium,
     fontSize: 8,
     lineHeight: 10,
     letterSpacing: 1,
   },
-  devices: { gap: 12, marginTop: 12 },
-  scanningPlaceholder: {
-    height: 228,
-    alignItems: 'center',
-    justifyContent: 'center',
-  },
-  scanningText: {
-    fontFamily: fontFamilies.medium,
-    fontSize: 9,
-    lineHeight: 10,
-  },
   spacer: { flexGrow: 1, minHeight: 20 },
   footer: { gap: 12 },
-  buttons: { gap: 8 },
   button: { minHeight: 42, height: 42 },
   buttonContent: { gap: 10 },
-  buttonLabel: { fontSize: 12, lineHeight: 22 },
-  retryLabel: { color: colors.accent, fontSize: 12, lineHeight: 22 },
 });

@@ -16,17 +16,18 @@ export function HealthMetricCard({
   icon: Icon,
   metric,
 }: HealthMetricCardProps) {
+  const value =
+    metric.value.state === 'available'
+      ? metric.value.text
+      : metric.value.state === 'unknown'
+        ? 'Desconhecido'
+        : 'Indisponível';
+
   return (
-    <Card style={styles.card}>
+    <Card accessibilityLabel={`${metric.label}: ${value}`} style={styles.card}>
       <View style={styles.header}>
         <View style={styles.icon}>
-          <View
-            style={
-              metric.icon === 'battery'
-                ? styles.rotatedBattery
-                : styles.unrotatedIcon
-            }
-          >
+          <View style={styles.unrotatedIcon}>
             <Icon color={colors.accent} size={26} />
           </View>
         </View>
@@ -41,7 +42,7 @@ export function HealthMetricCard({
             {metric.label}
           </AppText>
           <AppText style={styles.value} tone="accent">
-            {metric.value}
+            {value}
           </AppText>
         </View>
       </View>
@@ -94,7 +95,6 @@ const styles = StyleSheet.create({
     borderRadius: radii.full,
     backgroundColor: colors.background,
   },
-  rotatedBattery: { transform: [{ rotate: '-90deg' }] },
   unrotatedIcon: {},
   copy: { flexShrink: 1, gap: 5 },
   label: {

@@ -4,13 +4,25 @@ import { StyleSheet, View } from 'react-native';
 import { AppText, Card, Toggle } from '@/components/ui';
 import { colors, fontFamilies, radii } from '@/theme';
 
-type PermissionCardProps = {
+type PermissionCardBaseProps = {
   description: string;
-  enabled: boolean;
   icon: LucideIcon;
   label: string;
-  onChange: (enabled: boolean) => void;
 };
+
+type PermissionCardProps = PermissionCardBaseProps &
+  (
+    | {
+        enabled: boolean;
+        onChange: (enabled: boolean) => void;
+        variant: 'toggle';
+      }
+    | {
+        enabled?: never;
+        onChange?: never;
+        variant: 'informational';
+      }
+  );
 
 export function PermissionCard({
   description,
@@ -18,6 +30,7 @@ export function PermissionCard({
   icon: Icon,
   label,
   onChange,
+  variant,
 }: PermissionCardProps) {
   return (
     <Card style={styles.card}>
@@ -30,19 +43,25 @@ export function PermissionCard({
           {description}
         </AppText>
       </View>
-      <Toggle
-        accessibilityLabel={`Permitir ${label}`}
-        onValueChange={onChange}
-        size="compact"
-        value={enabled}
-      />
+      {variant === 'toggle' ? (
+        <Toggle
+          accessibilityLabel={`Permitir ${label}`}
+          onValueChange={onChange}
+          size="compact"
+          value={enabled}
+        />
+      ) : (
+        <AppText style={styles.informational} tone="accent" variant="caption">
+          Ao conectar
+        </AppText>
+      )}
     </Card>
   );
 }
 
 const styles = StyleSheet.create({
   card: {
-    height: 68,
+    minHeight: 68,
     flexDirection: 'row',
     alignItems: 'center',
     gap: 16,
@@ -67,4 +86,5 @@ const styles = StyleSheet.create({
     fontSize: 9,
     lineHeight: 10,
   },
+  informational: { flexShrink: 0, fontSize: 9, lineHeight: 12 },
 });

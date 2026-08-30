@@ -15,9 +15,9 @@ const background = require('@/assets/images/initial-flow/onboarding-three-backgr
 const waves = require('@/assets/images/initial-flow/onboarding-three-waves.png');
 
 const guarantees = [
-  'Criptografia ponta a ponta.',
-  'Processamento seguro na nuvem.',
-  'Você no controle total dos seus dados.',
+  'Processamento local e offline.',
+  'Comunicação direta por cabo.',
+  'Seus dados permanecem sob seu controle.',
 ];
 
 export default function OnboardingThree() {
@@ -39,8 +39,8 @@ export default function OnboardingThree() {
           </AppText>
         </AppText>
         <AppText style={styles.subtitle} tone="secondary">
-          Seus dados são protegidos com{`\n`}criptografia avançada e você mantém
-          {`\n`}o controle o tempo todo.
+          A interpretação acontece no celular,{`\n`}sem depender de serviços em
+          nuvem.
         </AppText>
       </View>
 

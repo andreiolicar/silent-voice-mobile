@@ -8,9 +8,10 @@ export type HubResource = {
 };
 
 export const hubDeviceMock = {
-  battery: 86,
   connected: true,
-  name: 'Silent Voice Neckband',
+  gateway: 'Raspberry Pi Zero 2 W',
+  name: 'Módulo Silent Voice',
+  transport: 'USB',
 } as const;
 
 export const hubResourcesMock: HubResource[] = [
@@ -32,6 +33,6 @@ export const hubResourcesMock: HubResource[] = [
   {
     id: 'connectivity',
     title: 'Conectividade',
-    description: 'Gerencie a conexão com o dispositivo.',
+    description: 'Gerencie a conexão USB com o módulo.',
   },
 ];

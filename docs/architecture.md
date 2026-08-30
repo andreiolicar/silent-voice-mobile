@@ -2,35 +2,90 @@
 
 ## Stack
 
-React Native com Expo SDK 57, TypeScript estrito, Expo Router, Zustand, React Native Safe Area Context, Expo Font e Manrope. O projeto permanece no fluxo managed do Expo e pode receber `expo-dev-client` quando um Development Build for necessário.
+React Native com Expo SDK 57, TypeScript estrito, Expo Router, Zustand, React Native Safe Area Context, Expo Font e Manrope. O projeto permanece no fluxo managed do Expo.
 
 ## Organização
 
-- `app/`: entradas finas de rota e composição global do Expo Router; os fluxos inicial e principal delegam a UI para `src/features/`.
-- `src/components/ui/`: primitivas visuais genéricas orientadas pelo Design System.
-- `src/components/layout/`: Screen, cabeçalhos e navegação visual compartilhada.
-- `src/components/silent-voice/`: padrões visuais próprios do produto, sem lógica de feature.
+- `app/`: entradas finas de rota e composição global do Expo Router.
+- `src/components/ui/`: primitivas visuais genéricas do Design System.
+- `src/components/layout/`: estrutura de tela, cabeçalhos e navegação.
+- `src/components/silent-voice/`: padrões visuais do produto.
 - `src/domain/`: contratos e tipos independentes de UI e infraestrutura.
-- `src/stores/`: stores Zustand pequenas, separadas por responsabilidade.
+- `src/stores/`: stores Zustand pequenas e orientadas por responsabilidade.
 - `src/theme/`: tokens visuais centralizados.
-- `src/features/`: módulos verticais do fluxo inicial, playground e visão geral do sistema.
-- `src/services/`: reservado para integrações e adapters concretos.
+- `src/features/`: módulos verticais dos fluxos do produto.
+- `src/services/`: adapters concretos somente quando a integração física for autorizada por um ciclo específico.
 
-Pastas sem implementação não são preenchidas com arquivos vazios; surgem junto com a primeira responsabilidade real.
+## Arquitetura física atual
+
+O caminho de aquisição e decisão do MVP é:
+
+```text
+MyoWare 2
+  -> RAW + ENV
+ESP32-S3
+  -> aquisição EMG, processamento inicial e timestamps
+  -> UART 3,3 V + pulso físico de sincronização
+Raspberry Pi Zero 2 W
+  -> gateway, sincronização multimodal, câmera, contexto sonoro e controles
+  -> USB por cabo
+Samsung Galaxy A17
+  -> modelos locais, fusão, decisão, síntese de voz e aplicativo
+```
+
+O aplicativo Android conversa somente com o Raspberry Pi Zero 2 W. ESP32-S3, MyoWare 2, câmera OV5647 e INMP441 ficam atrás desse gateway.
+
+O caminho planejado de reprodução é:
+
+```text
+Android -> síntese de voz -> Raspberry Pi Zero 2 W -> MAX98357A -> alto-falante
+```
+
+O protocolo de dados e áudio sobre USB ainda não foi definido e depende de ensaio físico. O mobile não contém Android USB Host API, `UsbManager`, serial, HTTP, WebSocket, ADB, TCP ou protocolo próprio.
 
 ## Limite do dispositivo
 
-A aplicação depende de `SilentVoiceDevice`, nunca de uma biblioteca Bluetooth. Um futuro `BleSilentVoiceDevice` implementará o contrato em infraestrutura, enquanto um `MockSilentVoiceDevice` permitirá desenvolvimento e testes sem hardware.
+A aplicação depende de `SilentVoiceDevice`, nunca de uma API nativa diretamente.
 
 ```text
-UI / feature -> SilentVoiceDevice <- BLE adapter
-                                  <- Mock adapter
+UI / feature -> SilentVoiceDevice <- MockSilentVoiceDevice
+                                  <- UsbSilentVoiceDevice (futuro)
 ```
 
-Os estados de conexão e sessão são tipos de domínio. A descoberta e a conexão atuais são mocks visuais; não existe integração BLE ou código nativo neste ciclo.
+`DeviceTransport` contém apenas `usb`. A conexão é modelada como espera pelo cabo, detecção, autorização, conexão, estado conectado ou falha. O parâmetro `?state=` da tela de conexão existe somente no mock para inspeção determinística e não pertence ao contrato de um futuro adapter.
 
-## Visão geral do sistema
+`UsbSilentVoiceDevice` não está implementado. A autorização Android vinculada ao dispositivo e o protocolo definitivo serão definidos após validação física.
 
-As rotas internas de Home, Status dos Módulos e Saúde do Sistema permanecem em `app/(main)/`, enquanto UI, mocks e composição ficam em `src/features/system-overview/`. O estado atual é demonstrativo e centralizado em um mock tipado; nenhuma telemetria, persistência ou integração BLE foi simulada.
+## Hardware operacional
 
-O resumo de módulos da Home é derivado dos módulos obrigatórios: OpenMV Cam H7, Myoware 2.0, INMP441 e IMU. Por isso a interface exibe `4/4 Operando`; `Confirmation` é opcional e não entra no denominador, mesmo que o wireframe mostre `5/5`. A métrica do processador usa a nomenclatura normalizada `ESP32-S3`, e o gráfico de estabilidade é um asset estático local do Figma.
+Os seis subsistemas essenciais representados no aplicativo são:
+
+- Raspberry Pi Zero 2 W (SC0721), gateway físico;
+- ESP32-S3-DEV-KIT-N16R8-M (Waveshare 28836);
+- MyoWare 2 Muscle Sensor (DEV-27924);
+- câmera OV5647 de 5 MP (MakerHero DRA28), conectada por CSI;
+- INMP441 (MakerHero 4MDR3), conectado por I²S;
+- saída de áudio MAX98357A (Adafruit 3006) e alto-falante YSD 4 Ω / 3 W.
+
+A Home deriva a contagem operacional dessa lista. RSSI e percentuais dos power banks não fazem parte do modelo porque não existe fonte de telemetria validada.
+
+## Autorização física da fala
+
+O botão Metaltex AV16FA autoriza fisicamente cada tentativa:
+
+```text
+pressionar e manter -> ready -> capturing
+soltar -> decoding -> candidate -> validating -> confirmed -> speaking -> ready
+```
+
+O botão do aplicativo inicia ou encerra a sessão; ele não substitui o acionamento físico. A validação interna reconhece `physicalAuthorization`, `neuromuscular`, `visual`, `contextual` e `decision`, sem expor essas camadas ao usuário comum.
+
+## Contexto e processamento local
+
+O contexto ambiental vem do INMP441 via I²S para o Raspberry, entra em um buffer móvel de 10 segundos e chega ao Android separado do Histórico. O aplicativo não solicita o microfone do Galaxy para essa função.
+
+Interpretação e síntese são locais e offline no Android. Não há backend, armazenamento remoto ou processamento em nuvem modelado no MVP atual.
+
+## Mocks e telemetria
+
+Conexão, módulos, saúde e sessão ao vivo permanecem determinísticos e demonstrativos. Métricas de saúde aceitam valores disponíveis, desconhecidos ou indisponíveis; nenhum mock deve se tornar requisito obrigatório de telemetria para o hardware real.

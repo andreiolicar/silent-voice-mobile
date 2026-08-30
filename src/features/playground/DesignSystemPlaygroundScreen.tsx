@@ -1,13 +1,4 @@
-import {
-  ArrowRight,
-  BatteryFull,
-  Bluetooth,
-  Camera,
-  Headphones,
-  Radio,
-  RefreshCcw,
-  User,
-} from 'lucide-react-native';
+import { ArrowRight, Camera, Radio, Usb, User, Zap } from 'lucide-react-native';
 import { useState, type PropsWithChildren } from 'react';
 import { StyleSheet, View } from 'react-native';
 
@@ -114,10 +105,10 @@ export default function DesignSystemPlayground() {
         <PlaygroundSection title="Métricas">
           <View style={styles.cardGrid}>
             <MetricCard
-              description="Carregado"
-              icon={BatteryFull}
-              label="Bateria"
-              value="86%"
+              description="Módulo principal"
+              icon={Zap}
+              label="Alimentação"
+              value="Estável"
             />
             <MetricCard
               description="Resposta estimada"
@@ -135,47 +126,24 @@ export default function DesignSystemPlayground() {
               tone="secondary"
               variant="caption"
             >
-              DISPOSITIVOS ENCONTRADOS
+              CONEXÃO USB
             </AppText>
-            <IconButton
-              accessibilityLabel="Atualizar dispositivos encontrados"
-              icon={RefreshCcw}
-              onPress={() => undefined}
-              size="compact"
-              variant="refresh"
-            />
           </View>
           <DeviceCard
-            battery={67}
-            icon={Headphones}
-            name="Silent Voice Neckband"
-            rssi={-72}
-            status="Pronto para conectar"
-            variant="silentVoice"
-          />
-          <DeviceCard
-            battery={67}
-            icon={Headphones}
-            name="AirPods Pro"
-            rssi={-72}
-            variant="external"
-          />
-          <DeviceCard
-            battery={32}
-            icon={Bluetooth}
-            name="Dispositivo desconhecido"
-            rssi={-85}
-            variant="external"
+            description="Raspberry Pi Zero 2 W"
+            icon={Usb}
+            name="Módulo Silent Voice"
+            status="Conectado por USB"
+            statusTone="success"
           />
         </View>
 
         <PlaygroundSection title="Módulos">
           <ModuleCard
-            battery={96}
+            detail="Visão • CSI"
             icon={Camera}
-            name="Módulo de visão"
+            name="Câmera OV5647"
             requirement="required"
-            rssi={-42}
             state="connected"
           />
         </PlaygroundSection>

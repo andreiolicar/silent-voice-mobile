@@ -1,9 +1,9 @@
 import {
   Activity,
-  BatteryFull,
   Cpu,
   Thermometer,
   TrendingUp,
+  Zap,
   type LucideIcon,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -25,8 +25,8 @@ const stabilityChart = require('@/assets/images/system-overview/system-stability
 
 const healthIcons: Record<HealthMetric['icon'], LucideIcon> = {
   activity: Activity,
-  battery: BatteryFull,
   cpu: Cpu,
+  power: Zap,
   thermometer: Thermometer,
 };
 

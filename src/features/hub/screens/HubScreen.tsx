@@ -1,9 +1,4 @@
-import {
-  Activity,
-  Bluetooth,
-  Cpu,
-  SlidersHorizontal,
-} from 'lucide-react-native';
+import { Activity, Cable, Cpu, SlidersHorizontal } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { StyleSheet, View } from 'react-native';
 
@@ -25,7 +20,7 @@ const resourceIcons = {
   calibration: SlidersHorizontal,
   modules: Cpu,
   systemHealth: Activity,
-  connectivity: Bluetooth,
+  connectivity: Cable,
 } as const;
 
 export default function HubScreen() {
@@ -34,6 +29,7 @@ export default function HubScreen() {
   const resourceActions: Partial<Record<HubResourceId, () => void>> = {
     modules: () => router.push('/modules'),
     systemHealth: () => router.push('/system-health'),
+    connectivity: () => router.push('/connection'),
   };
 
   return (

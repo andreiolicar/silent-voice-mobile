@@ -1,11 +1,4 @@
-import {
-  Battery,
-  BatteryFull,
-  BatteryLow,
-  BatteryMedium,
-  X,
-  type LucideIcon,
-} from 'lucide-react-native';
+import { X, type LucideIcon } from 'lucide-react-native';
 import { StyleSheet, View } from 'react-native';
 
 import { colors, fontFamilies, radii, spacing } from '@/theme';
@@ -16,39 +9,24 @@ import { Card } from '../ui/Card';
 import { SuccessIndicator } from './SuccessIndicator';
 
 type ModuleCardProps = {
-  battery?: number;
+  detail: string;
   icon: LucideIcon;
   iconSize?: number;
   name: string;
-  requirement: 'required' | 'optional';
-  rssi?: number | null;
+  requirement: 'required';
   state: 'connected' | 'disconnected';
 };
 
 export function ModuleCard({
-  battery,
+  detail,
   icon: Icon,
   iconSize = 24,
   name,
-  requirement,
-  rssi,
   state,
 }: ModuleCardProps) {
   const isConnected = state === 'connected';
   const stateColor = isConnected ? colors.success : colors.textSecondary;
-  const stateLabel = isConnected ? 'Conectado' : 'Desconectado';
-  const metadata =
-    battery === undefined && rssi === undefined
-      ? null
-      : `RSSI ${rssi ?? '-'} dBm • ${battery ?? 0}%`;
-  const BatteryIcon =
-    battery === undefined || battery === 0
-      ? Battery
-      : battery >= 80
-        ? BatteryFull
-        : battery >= 40
-          ? BatteryMedium
-          : BatteryLow;
+  const stateLabel = isConnected ? 'Operando' : 'Indisponível';
 
   return (
     <Card accessibilityLabel={`${name}, ${stateLabel}`} style={styles.card}>
@@ -60,16 +38,8 @@ export function ModuleCard({
       <View style={styles.content}>
         <View style={styles.headline}>
           <AppText style={styles.name}>{name}</AppText>
-          <Badge
-            size="compact"
-            style={
-              requirement === 'required'
-                ? styles.requiredBadge
-                : styles.optionalBadge
-            }
-            tone={requirement === 'required' ? 'success' : 'neutral'}
-          >
-            {requirement === 'required' ? 'Obrigatório' : 'Opcional'}
+          <Badge size="compact" style={styles.requiredBadge} tone="success">
+            Essencial
           </Badge>
         </View>
         <View style={styles.state}>
@@ -78,14 +48,9 @@ export function ModuleCard({
             {stateLabel}
           </AppText>
         </View>
-        {metadata ? (
-          <View style={styles.metadata}>
-            <AppText style={styles.metadataText} tone="secondary">
-              {metadata}
-            </AppText>
-            <BatteryIcon color={stateColor} size={12} />
-          </View>
-        ) : null}
+        <AppText style={styles.detail} tone="secondary">
+          {detail}
+        </AppText>
       </View>
       {isConnected ? (
         <SuccessIndicator size={20} />
@@ -100,7 +65,7 @@ export function ModuleCard({
 
 const styles = StyleSheet.create({
   card: {
-    height: 74,
+    minHeight: 78,
     flexDirection: 'row',
     alignItems: 'center',
     gap: spacing.lg,
@@ -123,7 +88,7 @@ const styles = StyleSheet.create({
     borderRadius: radii.full,
     backgroundColor: colors.background,
   },
-  content: { flex: 1, alignItems: 'flex-start', gap: spacing.xs },
+  content: { minWidth: 0, flex: 1, alignItems: 'flex-start', gap: spacing.xs },
   headline: { flexDirection: 'row', alignItems: 'center', gap: spacing.md },
   name: {
     flexShrink: 1,
@@ -132,7 +97,6 @@ const styles = StyleSheet.create({
     lineHeight: 15,
   },
   requiredBadge: { backgroundColor: 'rgba(26, 169, 155, 0.3)' },
-  optionalBadge: { backgroundColor: 'rgba(146, 156, 173, 0.3)' },
   state: { flexDirection: 'row', alignItems: 'center', gap: spacing.xxs },
   stateDot: { width: 4, height: 4, borderRadius: radii.full },
   stateText: {
@@ -140,11 +104,10 @@ const styles = StyleSheet.create({
     fontSize: 9,
     lineHeight: 10,
   },
-  metadata: { flexDirection: 'row', alignItems: 'center', gap: spacing.xxs },
-  metadataText: {
+  detail: {
     fontFamily: fontFamilies.medium,
     fontSize: 9,
-    lineHeight: 10,
+    lineHeight: 11,
   },
   disconnectedIndicator: {
     width: 20,

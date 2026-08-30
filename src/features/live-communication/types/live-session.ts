@@ -1,19 +1,17 @@
-export type LiveSessionPhase =
-  | 'idle'
-  | 'listening'
-  | 'decoding'
-  | 'candidate'
-  | 'validating'
-  | 'confirmed'
-  | 'speaking'
-  | 'needsRetry'
-  | 'error';
+import type { SessionState } from '@/domain/device';
+
+export type LiveSessionPhase = SessionState;
 
 export type ValidationLayerState =
   'waiting' | 'validating' | 'approved' | 'rejected' | 'unavailable';
 
 export type ValidationLayer = {
-  id: 'neuromuscular' | 'mechanical' | 'visual' | 'contextual' | 'decision';
+  id:
+    | 'physicalAuthorization'
+    | 'neuromuscular'
+    | 'visual'
+    | 'contextual'
+    | 'decision';
   label: string;
   state: ValidationLayerState;
 };

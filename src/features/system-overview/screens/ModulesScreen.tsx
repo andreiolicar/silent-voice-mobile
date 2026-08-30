@@ -1,9 +1,10 @@
 import {
   Activity,
-  Box,
   Camera,
-  Eye,
+  Cpu,
   Mic,
+  Server,
+  Volume2,
   type LucideIcon,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -23,10 +24,11 @@ import {
 
 const moduleIcons: Record<SystemModule['icon'], LucideIcon> = {
   activity: Activity,
-  box: Box,
   camera: Camera,
-  eye: Eye,
+  gateway: Server,
   mic: Mic,
+  processor: Cpu,
+  speaker: Volume2,
 };
 
 export default function ModulesScreen() {
@@ -46,13 +48,12 @@ export default function ModulesScreen() {
       <View style={styles.section}>
         {systemModulesMock.map((module) => (
           <ModuleCard
-            battery={module.battery}
+            detail={module.detail}
             icon={moduleIcons[module.icon]}
             iconSize={module.icon === 'camera' ? 26 : 24}
             key={module.id}
             name={module.name}
             requirement={module.requirement}
-            rssi={module.rssi}
             state={module.state}
           />
         ))}

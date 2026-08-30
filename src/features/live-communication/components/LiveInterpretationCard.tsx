@@ -21,9 +21,14 @@ type LiveInterpretationCardProps = {
 };
 
 const phaseCopy = {
-  listening: {
-    title: 'Escutando...',
-    description: 'Captando sinais para identificar sua intenção.',
+  ready: {
+    title: 'Pronto para falar',
+    description:
+      'Pressione e mantenha o botão do Silent Voice para iniciar uma tentativa.',
+  },
+  capturing: {
+    title: 'Captando intenção...',
+    description: 'Solte o botão quando terminar.',
   },
   decoding: {
     title: 'Interpretando sinais...',
@@ -50,12 +55,14 @@ export function LiveInterpretationCard({
             Pronto para iniciar
           </AppText>
           <AppText tone="secondary" variant="bodySmall">
-            O sistema aguardará sua intenção de fala.
+            Inicie uma sessão para preparar o módulo.
           </AppText>
         </View>
       ) : null}
 
-      {session.phase === 'listening' || session.phase === 'decoding' ? (
+      {session.phase === 'ready' ||
+      session.phase === 'capturing' ||
+      session.phase === 'decoding' ? (
         <View style={styles.captureLayout}>
           <RadarIndicator
             accessibilityLabel={phaseCopy[session.phase].title}

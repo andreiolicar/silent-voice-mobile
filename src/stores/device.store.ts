@@ -8,6 +8,6 @@ type DeviceStore = {
 };
 
 export const useDeviceStore = create<DeviceStore>((set) => ({
-  connectionState: 'idle',
+  connectionState: 'disconnected',
   setConnectionState: (connectionState) => set({ connectionState }),
 }));

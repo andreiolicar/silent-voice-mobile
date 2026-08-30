@@ -8,7 +8,7 @@ O código em `src/theme/` é a fonte de verdade estrutural; o Figma é a referê
 - **Tipografia:** Manrope Regular, Medium, SemiBold e Bold. As variantes são `display`, `screenTitle`, `sectionTitle`, `subtitle`, `body`, `bodySmall`, `cardTitle`, `metric`, `supporting`, `caption`, `label`, `button`, `navigation` e `badge`.
 - **Espaçamento:** escala de 4, 6, 8, 10, 12, 16, 20, 24, 30 e 35. `screen` representa o padding horizontal responsivo de 30.
 - **Radius:** 10 para cards/controles, 20 para badges e 999 para pills/círculos.
-- **Linguagem flat:** O Silent Voice utiliza linguagem visual flat. Shadows não fazem parte do padrão base de cards, containers ou interações. A separação visual usa surface, spacing, contraste, radius e bordas sutis quando semanticamente necessárias. A única exceção atual é o glow verde mínimo do `DeviceCard` com variante `silentVoice`, usado para destacar o Silent Voice Neckband durante descoberta/seleção; ele é permanente no estado destacado e nunca aparece por hover.
+- **Linguagem flat:** O Silent Voice utiliza linguagem visual flat. Shadows não fazem parte do padrão de cards, containers ou interações. A separação visual usa surface, spacing, contraste, radius e bordas sutis quando semanticamente necessárias. O card do módulo conectado por USB também permanece sem glow ou elevação.
 - **Motion:** `fast` (140 ms), `normal` (180 ms) e `toggle` (200 ms), todos com easing suave compartilhado. Hover, press e focus alteram principalmente cor, background e opacidade; o Toggle anima horizontalmente apenas o próprio thumb. A preferência de redução de movimento elimina durações sem remover feedback visual.
 
 ## Componentes

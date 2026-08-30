@@ -1,189 +1,74 @@
-import {
-  BatteryFull,
-  BatteryLow,
-  BatteryMedium,
-  ChevronRight,
-  type LucideIcon,
-} from 'lucide-react-native';
-import {
-  Image,
-  Platform,
-  Pressable,
-  StyleSheet,
-  View,
-  type ImageSourcePropType,
-  type ViewStyle,
-} from 'react-native';
+import type { LucideIcon } from 'lucide-react-native';
+import { StyleSheet, View } from 'react-native';
 
-import { colors, fontFamilies, radii, webNoOutline } from '@/theme';
+import { colors, fontFamilies, radii, spacing } from '@/theme';
 
 import { AppText } from '../ui/AppText';
+import { Badge } from '../ui/Badge';
 import { Card } from '../ui/Card';
-import { SuccessIndicator } from './SuccessIndicator';
 
 type DeviceCardProps = {
-  battery?: number;
-  icon?: LucideIcon;
-  imageSource?: ImageSourcePropType;
+  description: string;
+  icon: LucideIcon;
   name: string;
-  onPress?: () => void;
-  rssi?: number;
-  status?: string;
-  variant?: 'silentVoice' | 'external';
+  status: string;
+  statusTone?: 'error' | 'neutral' | 'success';
 };
 
 export function DeviceCard({
-  battery,
+  description,
   icon: Icon,
-  imageSource,
   name,
-  onPress,
-  rssi,
   status,
-  variant = 'external',
+  statusTone = 'neutral',
 }: DeviceCardProps) {
-  const isSilentVoice = variant === 'silentVoice';
-  const isInteractive = isSilentVoice && Boolean(onPress);
-  const BatteryIcon =
-    battery === undefined
-      ? null
-      : battery >= 66
-        ? BatteryFull
-        : battery >= 40
-          ? BatteryMedium
-          : BatteryLow;
-  const metadata = [
-    rssi === undefined ? null : `RSSI ${rssi} dBm`,
-    battery === undefined ? null : `${battery}%`,
-  ].filter(Boolean);
-
   return (
-    <Pressable
-      accessibilityLabel={[name, status].filter(Boolean).join(', ')}
-      accessibilityRole={isInteractive ? 'button' : undefined}
-      disabled={!isInteractive}
-      onPress={isInteractive ? onPress : undefined}
-      style={[styles.pressable, webNoOutline]}
+    <Card
+      accessibilityLabel={`${name}. ${description}. ${status}.`}
+      style={styles.card}
     >
-      <Card
-        style={[
-          styles.card,
-          isSilentVoice ? styles.silentVoice : styles.external,
-        ]}
-      >
-        <View style={styles.icon}>
-          {imageSource ? (
-            <Image
-              resizeMode="contain"
-              source={imageSource}
-              style={styles.deviceImage}
-            />
-          ) : Icon ? (
-            <Icon color={colors.textSecondary} size={24} strokeWidth={1.5} />
-          ) : null}
-        </View>
-        <View style={styles.content}>
-          <AppText style={styles.name}>{name}</AppText>
-          {status ? (
-            <View style={styles.status}>
-              {isSilentVoice ? <View style={styles.statusDot} /> : null}
-              <AppText
-                style={styles.statusText}
-                tone={isSilentVoice ? 'accent' : 'secondary'}
-              >
-                {status}
-              </AppText>
-            </View>
-          ) : null}
-          {metadata.length ? (
-            <View style={styles.metadata}>
-              <AppText style={styles.metadataText} tone="secondary">
-                {metadata.join(' • ')}
-              </AppText>
-              {BatteryIcon ? (
-                <BatteryIcon color={colors.textSecondary} size={12} />
-              ) : null}
-            </View>
-          ) : null}
-        </View>
-        <View style={styles.action}>
-          {isSilentVoice ? (
-            <SuccessIndicator size={20} />
-          ) : (
-            <ChevronRight color={colors.textSecondary} size={16} />
-          )}
-        </View>
-      </Card>
-    </Pressable>
+      <View style={styles.icon}>
+        <Icon color={colors.accent} size={24} strokeWidth={1.6} />
+      </View>
+      <View style={styles.content}>
+        <AppText style={styles.name}>{name}</AppText>
+        <AppText style={styles.description} tone="secondary">
+          {description}
+        </AppText>
+      </View>
+      <Badge size="regular" tone={statusTone}>
+        {status}
+      </Badge>
+    </Card>
   );
 }
 
-const silentVoiceGlow =
-  Platform.select<ViewStyle>({
-    web: { boxShadow: '0 0 6px rgba(26, 169, 155, 0.25)' },
-    default: {
-      shadowColor: colors.accent,
-      shadowOffset: { width: 0, height: 0 },
-      shadowOpacity: 0.25,
-      shadowRadius: 6,
-      elevation: 2,
-    },
-  }) ?? {};
-
 const styles = StyleSheet.create({
-  pressable: { borderRadius: radii.card },
   card: {
+    minHeight: 72,
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 16,
-    padding: 12,
-    borderWidth: 0.8,
+    gap: spacing.md,
+    padding: spacing.md,
   },
-  silentVoice: {
-    height: 72,
-    minHeight: 72,
-    borderColor: colors.accent,
-    ...silentVoiceGlow,
-  },
-  external: { height: 68, minHeight: 68, borderColor: 'transparent' },
   icon: {
     width: 44,
     height: 44,
+    flexShrink: 0,
     alignItems: 'center',
     justifyContent: 'center',
     borderRadius: radii.full,
     backgroundColor: colors.background,
-    overflow: 'hidden',
   },
-  deviceImage: { width: 44, height: 44 },
-  content: { flex: 1, alignItems: 'flex-start', gap: 5 },
+  content: { minWidth: 0, flex: 1, gap: spacing.xs },
   name: {
     fontFamily: fontFamilies.semiBold,
     fontSize: 12,
     lineHeight: 15,
   },
-  status: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  statusDot: {
-    width: 4,
-    height: 4,
-    borderRadius: radii.full,
-    backgroundColor: colors.accent,
-  },
-  statusText: {
+  description: {
     fontFamily: fontFamilies.medium,
     fontSize: 9,
-    lineHeight: 10,
-  },
-  metadata: { flexDirection: 'row', alignItems: 'center', gap: 4 },
-  metadataText: {
-    fontFamily: fontFamilies.medium,
-    fontSize: 9,
-    lineHeight: 10,
-  },
-  action: {
-    width: 20,
-    height: 20,
-    alignItems: 'center',
-    justifyContent: 'center',
+    lineHeight: 12,
   },
 });

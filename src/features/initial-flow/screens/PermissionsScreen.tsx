@@ -1,4 +1,4 @@
-import { Bell, Bluetooth, Mic, ShieldCheck, Wifi } from 'lucide-react-native';
+import { Bell, Cable, ShieldCheck } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
 import { useState } from 'react';
 import { Platform, Pressable, StyleSheet, View } from 'react-native';
@@ -12,45 +12,9 @@ import {
 } from '@/features/initial-flow/components';
 import { fontFamilies, webNoOutline } from '@/theme';
 
-type PermissionKey = 'bluetooth' | 'microphone' | 'notifications' | 'wifi';
-
-const permissionItems = [
-  {
-    key: 'bluetooth' as const,
-    label: 'Bluetooth',
-    description: 'Conecte-se a dispositivos próximos.',
-    icon: Bluetooth,
-  },
-  {
-    key: 'microphone' as const,
-    label: 'Microfone',
-    description: 'Captura sua voz para comandos.',
-    icon: Mic,
-  },
-  {
-    key: 'notifications' as const,
-    label: 'Notificações',
-    description: 'Receba alertas e lembretes importantes.',
-    icon: Bell,
-  },
-  {
-    key: 'wifi' as const,
-    label: 'Wi-Fi / Rede local',
-    description: 'Melhora a comunicação e a resposta.',
-    icon: Wifi,
-  },
-];
-
 export default function Permissions() {
   const router = useRouter();
-  const [permissions, setPermissions] = useState<
-    Record<PermissionKey, boolean>
-  >({
-    bluetooth: true,
-    microphone: true,
-    notifications: false,
-    wifi: true,
-  });
+  const [notificationsEnabled, setNotificationsEnabled] = useState(false);
 
   const goToConnection = () => router.replace('/connection');
 
@@ -62,24 +26,27 @@ export default function Permissions() {
           Permissões e{`\n`}conectividade
         </AppText>
         <AppText style={styles.subtitle} tone="secondary">
-          Para operar com segurança e em tempo real,{`\n`}permita os acessos
-          abaixo.
+          Ative notificações e confira como o acesso{`\n`}ao módulo funciona.
         </AppText>
       </View>
 
       <View style={styles.cards}>
-        {permissionItems.map(({ description, icon, key, label }) => (
-          <PermissionCard
-            key={key}
-            description={description}
-            enabled={permissions[key]}
-            icon={icon}
-            label={label}
-            onChange={(enabled) =>
-              setPermissions((current) => ({ ...current, [key]: enabled }))
-            }
-          />
-        ))}
+        <PermissionCard
+          description="Receba alertas e lembretes importantes."
+          enabled={notificationsEnabled}
+          icon={Bell}
+          label="Notificações"
+          onChange={setNotificationsEnabled}
+          variant="toggle"
+        />
+        <PermissionCard
+          description={
+            'O acesso será solicitado quando o\nSilent Voice for conectado ao celular.'
+          }
+          icon={Cable}
+          label="Dispositivo USB"
+          variant="informational"
+        />
       </View>
 
       <View style={styles.spacer} />
@@ -88,7 +55,7 @@ export default function Permissions() {
           <Button
             contentStyle={styles.allowContent}
             iconSize={16}
-            label="Permitir acessos"
+            label="Continuar"
             labelStyle={styles.buttonLabel}
             leftIcon={ShieldCheck}
             leftIconBackgroundColor="rgba(123, 228, 219, 0.5)"

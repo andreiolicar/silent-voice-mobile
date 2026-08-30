@@ -1,9 +1,9 @@
 import {
-  BatteryFull,
+  Cable,
   CircleCheck,
   Clock3,
   Cpu,
-  Wifi,
+  Zap,
   type LucideIcon,
 } from 'lucide-react-native';
 import { useRouter } from 'expo-router';
@@ -35,9 +35,9 @@ const wearableAndPhone = require('@/assets/images/system-overview/wearable-and-p
 const cardWaves = require('@/assets/images/system-overview/home-card-waves.png');
 
 const metricIcons: Record<SystemMetricId, LucideIcon> = {
-  battery: BatteryFull,
+  power: Zap,
   latency: Clock3,
-  connection: Wifi,
+  connection: Cable,
   modules: Cpu,
 };
 
@@ -105,7 +105,6 @@ export default function HomeScreen() {
             <MetricCard
               description={metric.description}
               icon={metricIcons[metric.id]}
-              iconRotation={metric.id === 'battery' ? -90 : 0}
               key={metric.id}
               label={metric.label}
               onPress={

@@ -50,16 +50,26 @@ Avoid unnecessary abstractions, duplication, and speculative infrastructure.
 
 ## Hardware Boundary
 
-Application features must not depend directly on BLE libraries.
+Application features must not depend directly on native USB APIs or hardware libraries.
 
 Interaction with Silent Voice hardware must occur through domain contracts such as `SilentVoiceDevice`.
+
+The current hardware path is:
+
+```text
+MyoWare 2 -> ESP32-S3 -> Raspberry Pi Zero 2 W -> USB cable -> Android
+```
+
+The Raspberry Pi Zero 2 W is the physical gateway. Android communicates only with this gateway through the planned USB connection.
 
 Future implementations may include:
 
 - `MockSilentVoiceDevice`
-- `BleSilentVoiceDevice`
+- `UsbSilentVoiceDevice`
 
-Do not implement BLE unless the current cycle explicitly requests it.
+The USB protocol is not defined yet. Do not implement Android USB Host APIs, native drivers, serial transport, or a concrete `UsbSilentVoiceDevice` unless a future cycle explicitly requests it after physical validation.
+
+Do not reintroduce BLE, Wi-Fi, IMU, or direct application dependencies on ESP32-S3, MyoWare, camera, or INMP441 without an explicit architecture decision.
 
 ## Design System
 
@@ -140,7 +150,7 @@ Do not recreate existing visual assets approximately when the original asset is 
 
 Implement only the current cycle.
 
-Do not anticipate future screens, integrations, authentication, BLE, backend, or infrastructure unless explicitly requested.
+Do not anticipate future screens, integrations, authentication, native USB, backend, or infrastructure unless explicitly requested.
 
 Do not refactor unrelated code without a concrete reason.
 

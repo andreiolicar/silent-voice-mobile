@@ -1,4 +1,4 @@
-import { AudioLines, CircleAlert, Radio } from 'lucide-react-native';
+import { AudioLines, CircleAlert, CircleDot, Radio } from 'lucide-react-native';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import { StyleSheet, View } from 'react-native';
@@ -24,7 +24,7 @@ export default function LiveCommunicationScreen() {
   const params = useLocalSearchParams<{ phase?: string | string[] }>();
   const requestedPhase = resolveLiveSessionPhase(params.phase);
   const [phase, setPhase] = useState<LiveSessionPhase>(
-    () => requestedPhase ?? 'validating',
+    () => requestedPhase ?? 'ready',
   );
 
   const session = useMemo(() => createMockLiveSessionState(phase), [phase]);
@@ -64,7 +64,7 @@ export default function LiveCommunicationScreen() {
         </View>
 
         <LiveInterpretationCard
-          onRetry={() => setPhase('listening')}
+          onRetry={() => setPhase('ready')}
           session={session}
         />
 
@@ -79,7 +79,7 @@ export default function LiveCommunicationScreen() {
 
         <Button
           label={isSessionActive ? 'Parar comunicação' : 'Iniciar comunicação'}
-          onPress={() => setPhase(isSessionActive ? 'idle' : 'listening')}
+          onPress={() => setPhase(isSessionActive ? 'idle' : 'ready')}
           variant={isSessionActive ? 'danger' : 'primary'}
         />
       </View>
@@ -90,6 +90,22 @@ export default function LiveCommunicationScreen() {
 function getSessionStatus(phase: LiveSessionPhase) {
   if (phase === 'idle') {
     return { icon: Radio, label: 'Sessão parada', tone: 'neutral' as const };
+  }
+
+  if (phase === 'ready') {
+    return {
+      icon: CircleDot,
+      label: 'Aguardando botão',
+      tone: 'success' as const,
+    };
+  }
+
+  if (phase === 'capturing') {
+    return {
+      icon: AudioLines,
+      label: 'Captando agora',
+      tone: 'success' as const,
+    };
   }
 
   if (phase === 'confirmed' || phase === 'speaking') {
@@ -105,8 +121,8 @@ function getSessionStatus(phase: LiveSessionPhase) {
   }
 
   return {
-    icon: AudioLines,
-    label: 'Escutando agora',
+    icon: Radio,
+    label: 'Sessão ativa',
     tone: 'success' as const,
   };
 }

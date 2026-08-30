@@ -1,47 +1,47 @@
-import { BatteryFull } from 'lucide-react-native';
-import { Image, StyleSheet, View } from 'react-native';
+import { Usb } from 'lucide-react-native';
+import { StyleSheet, View } from 'react-native';
 
 import { StatusBadge } from '@/components/silent-voice';
 import { AppText, Card } from '@/components/ui';
 import { colors, radii, spacing } from '@/theme';
 
-const neckbandThumbnail = require('@/assets/images/initial-flow/connection-neckband-thumbnail.png');
-
 type HubDeviceCardProps = {
-  battery: number;
   connected: boolean;
+  gateway: string;
   name: string;
+  transport: 'USB';
 };
 
 export function HubDeviceCard({
-  battery,
   connected,
+  gateway,
   name,
+  transport,
 }: HubDeviceCardProps) {
+  const status = connected ? 'Conectado' : 'Desconectado';
+
   return (
     <Card
-      accessibilityLabel={`${name}. ${connected ? 'Conectado' : 'Desconectado'}. ${battery}% de bateria.`}
+      accessibilityLabel={`${name}. ${gateway}. ${status} por ${transport}.`}
       style={styles.card}
     >
       <View style={styles.iconFrame}>
-        <Image
-          resizeMode="contain"
-          source={neckbandThumbnail}
-          style={styles.deviceImage}
-        />
+        <Usb color={colors.accent} size={24} strokeWidth={1.7} />
       </View>
       <View style={styles.copy}>
         <AppText variant="cardTitle">{name}</AppText>
+        <AppText tone="secondary" variant="caption">
+          {gateway}
+        </AppText>
+      </View>
+      <View style={styles.connection}>
         <StatusBadge
-          label={connected ? 'Conectado' : 'Desconectado'}
+          label={status}
           size="compact"
           tone={connected ? 'success' : 'neutral'}
         />
-      </View>
-      <View style={styles.battery}>
-        <BatteryFull color={colors.accent} size={18} />
-        <AppText tone="secondary" variant="supporting">
-          {battery}%
+        <AppText tone="accent" variant="caption">
+          {transport}
         </AppText>
       </View>
     </Card>
@@ -64,11 +64,6 @@ const styles = StyleSheet.create({
     borderRadius: radii.full,
     backgroundColor: colors.background,
   },
-  deviceImage: { width: 44, height: 44 },
   copy: { minWidth: 0, flex: 1, gap: spacing.xs },
-  battery: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    gap: spacing.xs,
-  },
+  connection: { alignItems: 'flex-end', gap: spacing.xs },
 });
