@@ -27,6 +27,7 @@ export default function HubScreen() {
   const router = useRouter();
 
   const resourceActions: Partial<Record<HubResourceId, () => void>> = {
+    calibration: () => router.push('/calibration?origin=hub'),
     modules: () => router.push('/modules'),
     systemHealth: () => router.push('/system-health'),
     connectivity: () => router.push('/connection'),

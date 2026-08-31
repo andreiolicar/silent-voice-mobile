@@ -18,7 +18,7 @@ export const hubResourcesMock: HubResource[] = [
   {
     id: 'calibration',
     title: 'Calibração',
-    description: 'Ajuste a leitura dos sinais.',
+    description: 'Ajuste a leitura dos seus sinais.',
   },
   {
     id: 'modules',

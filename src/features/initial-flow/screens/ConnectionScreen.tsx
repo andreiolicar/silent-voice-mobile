@@ -22,7 +22,7 @@ import {
   resolveMockConnectionState,
 } from '../data/connection.mock';
 
-const POST_CONNECTION_ROUTE = '/home' as const;
+const POST_CONNECTION_ROUTE = '/calibration?origin=setup' as const;
 const MOCK_STEP_DURATION = 850;
 
 export default function Connection() {
