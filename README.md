@@ -180,5 +180,5 @@ Este repositório reúne a camada mobile de um projeto colaborativo de tecnologi
 
 A base Expo mantém seus créditos no arquivo [`LICENSE`](LICENSE).
 
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-21262D?style=for-the-badge)](https://www.linkedin.com/in/andrei-oliveira-carneiro-0a35b8310/)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-21262D?style=for-the-badge)](https://www.linkedin.com/in/andrei-carneiro-0a35b8310/)
 [![GitHub](https://img.shields.io/badge/GitHub-21262D?style=for-the-badge&logo=github&logoColor=white)](https://github.com/andreiolicar)
